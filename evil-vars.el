@@ -454,7 +454,7 @@ replicates the default vim behavior."
                (define-key evil-motion-state-map (kbd "C-d") 'evil-scroll-down))))))
 
 (defcustom evil-want-C-w-delete t
-  "Whether \"C-w\" deletes a word in Insert state."
+  "Whether \"C-w\" deletes a word in Insert/Ex/search state."
   :type 'boolean
   :group 'evil
   :set #'(lambda (sym value)
@@ -468,7 +468,28 @@ replicates the default vim behavior."
               ((and value
                     (eq (lookup-key evil-insert-state-map (kbd "C-w"))
                         'evil-window-map))
-               (define-key evil-insert-state-map (kbd "C-w") 'evil-delete-backward-word))))))
+               (define-key evil-insert-state-map (kbd "C-w") 'evil-delete-backward-word))))
+           (when (boundp 'evil-ex-completion-map)
+             (cond
+              ((and (not value)
+                    (eq (lookup-key evil-ex-completion-map (kbd "C-w"))
+                        'backward-kill-word))
+               (define-key evil-ex-completion-map (kbd "C-w") nil))
+              ((and value
+                    (eq (lookup-key evil-ex-completion-map (kbd "C-w"))
+                        nil))
+               (define-key evil-ex-completion-map (kbd "C-w") 'backward-kill-word))))
+           (when (boundp 'evil-ex-search-keymap)
+             (cond
+              ((and (not value)
+                    (eq (lookup-key evil-ex-search-keymap (kbd "C-w"))
+                        'backward-kill-word))
+               (define-key evil-ex-search-keymap (kbd "C-w") 'evil-search-yank-word))
+              ((and value
+                    (eq (lookup-key evil-ex-search-keymap (kbd "C-w"))
+                        'evil-search-yank-word))
+               (define-key evil-ex-search-keymap (kbd "C-w") 'backward-kill-word))))
+           ))
 
 (defcustom evil-want-C-w-in-emacs-state nil
   "Whether \"C-w\" prefixes windows commands in Emacs state."
